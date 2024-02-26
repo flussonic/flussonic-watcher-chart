@@ -1,48 +1,45 @@
+{{- if .Values.watcher.create -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: watcher
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
   labels:
-    name: watcher
+    name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
 spec:
   ports:
   - port: 80
     targetPort: 9015
     name: watcher
   selector:
-    app: watcher
+    app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: watcher
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
 spec:
-  serviceName: watcher
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
   replicas: 1
   selector:
     matchLabels:
-      app: watcher
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
   template:
     metadata:
       labels:
-        app: watcher
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher
     spec:
       containers:
       - name: watcher
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
-        ports:
-        - containerPort: 9015
-          hostPort: 80
         env:
         - name: DB
-          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "9015"
         - name: LISTEN_HOST
           value: '0.0.0.0'
-
-
+{{- end }}

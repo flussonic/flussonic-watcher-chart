@@ -1,19 +1,18 @@
-
----
+{{- if .Values.watcher.create -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: watcher-worker
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
 spec:
-  serviceName: watcher-worker
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
   replicas: 1
   selector:
     matchLabels:
-      app: watcher-worker
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
   template:
     metadata:
       labels:
-        app: watcher-worker
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
     spec:
       containers:
       - name: watcher-worker
@@ -22,11 +21,11 @@ spec:
         - worker
         env:
         - name: DB
-          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "5000"
 
@@ -35,17 +34,17 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: watcher-scheduler
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
 spec:
-  serviceName: watcher-scheduler
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
   replicas: 1
   selector:
     matchLabels:
-      app: watcher-scheduler
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
   template:
     metadata:
       labels:
-        app: watcher-scheduler
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
     spec:
       containers:
       - name: watcher-scheduler
@@ -54,29 +53,28 @@ spec:
         - scheduler
         env:
         - name: DB
-          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
-
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
 
 
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: watcher-episodes
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
 spec:
-  serviceName: watcher-episodes
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
   replicas: 1
   selector:
     matchLabels:
-      app: watcher-episodes
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
   template:
     metadata:
       labels:
-        app: watcher-episodes
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
     spec:
       containers:
       - name: watcher-episodes
@@ -85,8 +83,9 @@ spec:
         - episodes
         env:
         - name: DB
-          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
+{{- end }}

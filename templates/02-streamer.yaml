@@ -16,6 +16,14 @@ data:
       backend http://watcher.default.svc.cluster.local/vsaas/api/camera_auth;
     }
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Chart.Name }}-license-storage
+data:
+# root:password
+  edit_auth: cm9vdDpwYXNzd29yZA==  
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -66,13 +74,13 @@ spec:
               key: license_key
               optional: false
         - name: FLUSSONIC_CONFIG_EXTERNAL
-          value: "http://apikey0@central.default.svc.cluster.local/streamer/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
+          value: "http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
         - name: FLUSSONIC_SECRETS_STORAGE
-          value: "k8s://test-secret"
+          value: "k8s://{{ .Chart.Name }}-license-storage"
         - name: FLUSSONIC_EDIT_AUTH
           valueFrom:
             secretKeyRef:
-              name: test-secret
+              name: {{ .Chart.Name }}-license-storage
               key: edit_auth
               optional: false
         livenessProbe:
@@ -95,13 +103,13 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 3
         volumeMounts:
-        - name: config-template
+        - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
           mountPath: /etc/flussonic/flussonic.conf.d/cluster.conf
           subPath: cluster.conf
       volumes:
-      - name: config-template
+      - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
         configMap:
-          name: streamer-presets
+          name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer-presets
           items:
           - key: cluster.conf
             path: cluster.conf

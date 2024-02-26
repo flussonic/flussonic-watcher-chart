@@ -1,31 +1,32 @@
+{{- if .Values.redis.create -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-redis
   labels:
-    name: redis
+    name: {{ include "flussonic-watcher-chart.fullname" . }}-redis
 spec:
   ports:
   - port: 9017
     targetPort: 9017
     name: redis
   selector:
-    app: redis
+    app: {{ include "flussonic-watcher-chart.fullname" . }}-redis
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-redis
 spec:
-  serviceName: redis
+  serviceName: r{{ include "flussonic-watcher-chart.fullname" . }}-edis
   replicas: 1
   selector:
     matchLabels:
-      app: redis
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-redis
   template:
     metadata:
       labels:
-        app: redis
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-redis
     spec:
       containers:
       - name: redis
@@ -38,4 +39,4 @@ spec:
         - "9017"
         - --save
         - ""
-
+{{- end}}

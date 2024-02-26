@@ -4,6 +4,13 @@
 
 replicaCount: 1
 
+postgres:
+  create: true
+  repository: postgres
+  tag: "15.3"
+  nodeSelector:
+    flussonic.com/database: "true"
+
 streamer:
   repository: flussonic/flussonic
   tag: "v24.02-107"
@@ -11,13 +18,17 @@ streamer:
     flussonic.com/streamer: "true"
 
 central:
+  create: true
   repository: flussonic/central
   tag: "v24.02-73"    
 
 watcher:
+  create: true
   repository: flussonic/watcher
   tag: "v24.02.1-48"    
 
+redis:
+  create: true
 
 imagePullSecrets: []
 nameOverride: ""

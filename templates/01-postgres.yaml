@@ -1,37 +1,36 @@
+{{- if .Values.postgres.create -}}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
   labels:
-    name: postgres
+    name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 spec:
   ports:
   - port: 5432
     targetPort: 5432
     name: postgres
   selector:
-    app: postgres
+    app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 spec:
-  serviceName: postgres
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
   template:
     metadata:
       labels:
-        app: postgres
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
     spec:
-      nodeSelector:
-        flussonic.com/database: "true"
       containers:
-      - name: postgres
-        image: postgres:15.3
+      - name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+        image: "{{ .Values.postgres.repository }}:{{ .Values.postgres.tag }}"
         ports:
         - containerPort: 5432
         env:
@@ -43,4 +42,8 @@ spec:
           value: test_c
         - name: POSTGRES_HOST_AUTH_METHOD
           value: trust
-
+      {{- with .Values.postgres.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
