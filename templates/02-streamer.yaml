@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer-presets
+data:
+  cluster.conf: |
+    http 80 {
+      api false;
+    }
+    http 81;
+    cluster_key steamerSecretKey0;
+    dvr central {
+      root /storage;
+    }
+    auth_backend vsaas {
+      backend http://watcher.default.svc.cluster.local/vsaas/api/camera_auth;
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+spec:
+  selector:
+    matchLabels:
+      app: streamer
+  template:
+    metadata:
+      {{- with .Values.streamer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: streamer
+        {{- include "flussonic-watcher-chart.labels" . | nindent 8 }}
+        {{- with .Values.streamer.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}-streamer
+        image: "{{ .Values.streamer.repository }}:{{ .Values.streamer.tag }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          name: http
+        - containerPort: 81
+          name: http-api
+        env:
+        - name: FLUSSONIC_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flussonic-license
+              key: license_key
+              optional: false
+        - name: FLUSSONIC_CONFIG_EXTERNAL
+          value: "http://apikey0@central.default.svc.cluster.local/streamer/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
+        - name: FLUSSONIC_SECRETS_STORAGE
+          value: "k8s://test-secret"
+        - name: FLUSSONIC_EDIT_AUTH
+          valueFrom:
+            secretKeyRef:
+              name: test-secret
+              key: edit_auth
+              optional: false
+        livenessProbe:
+          httpGet:
+            path: /flussonic/api/v3/monitoring/liveness
+            port: 81
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        startupProbe:
+          httpGet:
+            path: /flussonic/api/v3/monitoring/readiness
+            port: 81
+          initialDelaySeconds: 3
+          periodSeconds: 3
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /flussonic/api/v3/monitoring/readiness
+            port: 81
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        volumeMounts:
+        - name: config-template
+          mountPath: /etc/flussonic/flussonic.conf.d/cluster.conf
+          subPath: cluster.conf
+      volumes:
+      - name: config-template
+        configMap:
+          name: streamer-presets
+          items:
+          - key: cluster.conf
+            path: cluster.conf
+      {{- with .Values.streamer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.streamer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.streamer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+

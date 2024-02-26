@@ -1,0 +1,92 @@
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: watcher-worker
+spec:
+  serviceName: watcher-worker
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watcher-worker
+  template:
+    metadata:
+      labels:
+        app: watcher-worker
+    spec:
+      containers:
+      - name: watcher-worker
+        image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
+        args:
+        - worker
+        env:
+        - name: DB
+          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+        - name: REDIS
+          value: redis://redis.default.svc.cluster.local:9017
+        - name: CENTRAL_URL
+          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+        - name: PORT
+          value: "5000"
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: watcher-scheduler
+spec:
+  serviceName: watcher-scheduler
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watcher-scheduler
+  template:
+    metadata:
+      labels:
+        app: watcher-scheduler
+    spec:
+      containers:
+      - name: watcher-scheduler
+        image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
+        args:
+        - scheduler
+        env:
+        - name: DB
+          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+        - name: REDIS
+          value: redis://redis.default.svc.cluster.local:9017
+        - name: CENTRAL_URL
+          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+
+
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: watcher-episodes
+spec:
+  serviceName: watcher-episodes
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watcher-episodes
+  template:
+    metadata:
+      labels:
+        app: watcher-episodes
+    spec:
+      containers:
+      - name: watcher-episodes
+        image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
+        args:
+        - episodes
+        env:
+        - name: DB
+          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+        - name: REDIS
+          value: redis://redis.default.svc.cluster.local:9017
+        - name: CENTRAL_URL
+          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3

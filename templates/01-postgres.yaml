@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+  labels:
+    name: postgres
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+  selector:
+    app: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        flussonic.com/database: "true"
+      containers:
+      - name: postgres
+        image: postgres:15.3
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: test
+        - name: POSTGRES_PASSWORD
+          value: test
+        - name: POSTGRES_DB
+          value: test_c
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: trust
+

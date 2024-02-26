@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: central
+  labels:
+    name: central
+spec:
+  ports:
+  - port: 80
+    targetPort: 9000
+    name: central
+  selector:
+    app: central
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: central
+spec:
+  serviceName: central
+  replicas: 1
+  selector:
+    matchLabels:
+      app: central
+  template:
+    metadata:
+      labels:
+        app: central
+    spec:
+      serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
+      containers:
+      - name: {{ .Chart.Name }}-central
+        image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
+        ports:
+        - containerPort: 9000
+          hostPort: 80
+        env:
+        - name: DATABASE_URL
+          value: postgres://test:test@postgres.default.svc.cluster.local:5432/test_c?search_path=central
+        - name: HTTP_PORT
+          value: "9000"
+        - name: API_KEY
+          value: apikey0
+        - name: EDIT_AUTH
+          value: "admin pass"
+        - name: API_URL
+          value: "http://central.default.svc.cluster.local"
+      {{- with .Values.central.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.central.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.central.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: central-streamers-provisioner
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
+          containers:
+          - name: central-provisioner
+            image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
+            imagePullPolicy: IfNotPresent
+            command:
+            - /opt/central/bin/run.sh
+            - -p
+            env:
+            - name: CLUSTER_KEY
+              value: steamerSecretKey0
+            - name: API_KEY
+              value: apikey0
+          restartPolicy: OnFailure

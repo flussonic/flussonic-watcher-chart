@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: watcher
+  labels:
+    name: watcher
+spec:
+  ports:
+  - port: 80
+    targetPort: 9015
+    name: watcher
+  selector:
+    app: watcher
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: watcher
+spec:
+  serviceName: watcher
+  replicas: 1
+  selector:
+    matchLabels:
+      app: watcher
+  template:
+    metadata:
+      labels:
+        app: watcher
+    spec:
+      containers:
+      - name: watcher
+        image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
+        ports:
+        - containerPort: 9015
+          hostPort: 80
+        env:
+        - name: DB
+          value: postgresql://test:test@postgres.default.svc.cluster.local:5432/test_c
+        - name: REDIS
+          value: redis://redis.default.svc.cluster.local:9017
+        - name: CENTRAL_URL
+          value: http://apikey0@central.default.svc.cluster.local/streamer/api/v3
+        - name: PORT
+          value: "9015"
+        - name: LISTEN_HOST
+          value: '0.0.0.0'
+
+
