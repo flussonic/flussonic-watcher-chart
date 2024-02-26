@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-worker
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-worker
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-worker
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-worker
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-worker
     spec:
       containers:
-      - name: watcher-worker
+      - name: worker
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
         args:
         - worker
@@ -34,20 +34,20 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-scheduler
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
     spec:
       containers:
-      - name: watcher-scheduler
+      - name: scheduler
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
         args:
         - scheduler
@@ -64,20 +64,20 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
+  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-watcher-episodes
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
     spec:
       containers:
-      - name: watcher-episodes
+      - name: episodes
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
         args:
         - episodes
