@@ -12,6 +12,46 @@ spec:
     name: postgres
   selector:
     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: postgres-pv
+#   # labels:
+#   #   app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+# spec:
+#   storageClassName: local-storage
+#   capacity:
+#     storage: 1Gi
+#   accessModes:
+#   - ReadWriteOnce
+#   hostPath:
+#     path: /var/lib/postgresql/data
+#   nodeAffinity:
+#       required:
+#         nodeSelectorTerms:
+#         - matchExpressions:
+#           - key: flussonic.com/database
+#             operator: In
+#             values:
+#             - "true"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  # storageClassName: local-path
+  # storageClassName: ""
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 1Gi
+  # selector:
+  #   matchLabels:
+  #     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -47,21 +87,21 @@ spec:
             command:
               - /bin/sh
               - -c
-              - exec pg_isready -U "postgres" -h 127.0.0.1 -p {{ .port }}
+              - exec pg_isready -U "postgres" -h 127.0.0.1
           failureThreshold: 2
           initialDelaySeconds: 120
           periodSeconds: 60
           timeoutSeconds: 30
-      #   volumeMounts:
+        volumeMounts:
       #     - mountPath: /dev/shm
       #       name: dshm
-      #     - mountPath: /var/lib/postgresql/data
-      #       subPath: data
-      #       name: data
-      # volumes:
-      #   - name: data
-      #     persistentVolumeClaim:
-      #       claimName: postgresql-data-pvc
+          - mountPath: /var/lib/postgresql/data
+            subPath: data
+            name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
       #   - name: dshm
       #     persistentVolumeClaim:
       #       claimName: postgresql-dshm-pvc

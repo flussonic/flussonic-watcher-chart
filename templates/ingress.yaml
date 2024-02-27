@@ -1,6 +1,5 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "flussonic-watcher-chart.fullname" . -}}
-{{- $svcPort := .Values.watcher.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
@@ -36,14 +35,33 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
+  defaultBackend:
+    service:
+      name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+      port:
+        number: 80
   rules:
     - http:
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Exact
             backend:
               service:
-                name: {{ $fullName }}
+                name: {{ include "flussonic-watcher-chart.fullname" . }}
                 port:
-                  number: {{ $svcPort }}
+                  number: 80
+          - path: /vsaas
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "flussonic-watcher-chart.fullname" . }}
+                port:
+                  number: 80
+          - path: /watcher
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "flussonic-watcher-chart.fullname" . }}
+                port:
+                  number: 80
 {{- end }}

@@ -106,6 +106,8 @@ spec:
               value: steamerSecretKey0
             - name: API_KEY
               value: apikey0
+            - name: SELECTOR
+              value: app=streamer
             - name: CENTRAL_API
               value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
           restartPolicy: OnFailure

@@ -45,6 +45,9 @@ kubectl create secret generic flussonic-license --from-literal=license_key="${LI
 
 kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --from-literal=pass="${PASS}"
 
+kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
+# multipass exec watcher sudo mkdir -p /var/lib/postgresql/data
+
 helm install tw .
 
 watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
@@ -52,14 +55,11 @@ streamer1_ip=$(multipass info streamer1 | grep -i ip | awk '{print $2}')
 streamer2_ip=$(multipass info streamer2 | grep -i ip | awk '{print $2}')
 
 echo "Waiting for Postgresql to start" 
-kubectl wait --for=condition=Ready pod/tw-flussonic-watcher-postgres-0
+kubectl wait --for=condition=Ready pod/tw-flussonic-watcher-web-0
 
+sleep 2
 kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
     /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
-    "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\"]');"
-    # "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
+    "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
 
-# echo "Waiting for Watcher http://${watcher_ip} to start" 
-# kubectl wait --for=condition=Ready pod/watcher-0
-
-# echo "Watcher ready: http://${watcher_ip}/vsaas  with login/pass: ${LOGIN} ${PASS}"
+echo "Watcher ready: http://${watcher_ip}/vsaas  with login/pass: ${LOGIN} ${PASS}"

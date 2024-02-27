@@ -1,5 +1,20 @@
 {{- if .Values.streamer.create -}}
 apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+  labels:
+    {{- include "flussonic-watcher-chart.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    name: streamer
+  selector:
+    app: streamer
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer-presets
@@ -54,7 +69,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name: {{ .Chart.Name }}-streamer
+      - name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
         image: "{{ .Values.streamer.repository }}:{{ .Values.streamer.tag }}"
         imagePullPolicy: IfNotPresent
         ports:
