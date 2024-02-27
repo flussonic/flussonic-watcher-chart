@@ -4,8 +4,8 @@ kind: Job
 metadata:
   name: watcher-firstrun
 spec:
-  backoffLimit: 2
-  activeDeadlineSeconds: 120
+  backoffLimit: 20
+  activeDeadlineSeconds: 180
   template:
     spec:
       containers:

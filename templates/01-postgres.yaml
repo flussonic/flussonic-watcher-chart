@@ -12,29 +12,38 @@ spec:
     name: postgres
   selector:
     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
-# ---
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: postgres-pv
-#   # labels:
-#   #   app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
-# spec:
-#   storageClassName: local-storage
-#   capacity:
-#     storage: 1Gi
-#   accessModes:
-#   - ReadWriteOnce
-#   hostPath:
-#     path: /var/lib/postgresql/data
-#   nodeAffinity:
-#       required:
-#         nodeSelectorTerms:
-#         - matchExpressions:
-#           - key: flussonic.com/database
-#             operator: In
-#             values:
-#             - "true"
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+  labels:
+    app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /watcher/postgresql
+  nodeAffinity:
+      required:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: flussonic.com/database
+            operator: In
+            values:
+            - "true"
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -43,15 +52,14 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  # storageClassName: local-path
-  # storageClassName: ""
-  storageClassName: longhorn
+  storageClassName: local-storage
+  # storageClassName: longhorn
   resources:
     requests:
       storage: 1Gi
-  # selector:
-  #   matchLabels:
-  #     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+  selector:
+    matchLabels:
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet

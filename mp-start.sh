@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -ex
 
@@ -20,9 +20,9 @@ if [ -z "$PASS" ]; then
     read -p "Enter Watcher password: "  PASS
 fi
 
-multipass launch --name watcher --cpus 1 --memory 1024M --disk 5G focal
-multipass launch --name streamer1 --cpus 1 --memory 1024M --disk 5G focal
-multipass launch --name streamer2 --cpus 1 --memory 1024M --disk 5G focal
+multipass launch --name watcher --cpus 1 --memory 1024M --disk 5G lts
+multipass launch --name streamer1 --cpus 1 --memory 1024M --disk 5G lts
+multipass launch --name streamer2 --cpus 1 --memory 1024M --disk 5G lts
 
 # multipass exec watcher -- sudo /bin/sh -c 'curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" INSTALL_K3S_VERSION="v1.25.11+k3s1" sh -'
 multipass exec watcher -- sudo /bin/sh -c 'curl -sfL https://get.k3s.io | sh -'
@@ -45,8 +45,10 @@ kubectl create secret generic flussonic-license --from-literal=license_key="${LI
 
 kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --from-literal=pass="${PASS}"
 
-kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-# multipass exec watcher sudo mkdir -p /var/lib/postgresql/data
+# kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.26/deploy/local-path-storage.yaml
+# kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+# kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
+multipass exec watcher sudo mkdir -p /watcher/postgresql
 
 helm install tw .
 
