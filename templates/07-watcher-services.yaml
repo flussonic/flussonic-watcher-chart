@@ -21,11 +21,11 @@ spec:
         - worker
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "5000"
 
@@ -53,11 +53,11 @@ spec:
         - scheduler
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
 
 
 ---
@@ -83,9 +83,9 @@ spec:
         - episodes
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
 {{- end }}

@@ -14,7 +14,7 @@ data:
       root /storage;
     }
     auth_backend vsaas {
-      backend http://watcher.default.svc.cluster.local/vsaas/api/camera_auth;
+      backend http://watcher.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
     }
 ---
 apiVersion: v1
@@ -74,7 +74,7 @@ spec:
               key: license_key
               optional: false
         - name: FLUSSONIC_CONFIG_EXTERNAL
-          value: "http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
+          value: "http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
         - name: FLUSSONIC_SECRETS_STORAGE
           value: "k8s://{{ .Chart.Name }}-license-storage"
         - name: FLUSSONIC_EDIT_AUTH

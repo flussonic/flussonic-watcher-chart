@@ -34,6 +34,7 @@ multipass exec streamer1 -- sudo /bin/sh -c "curl -sfL https://get.k3s.io | K3S_
 multipass exec streamer2 -- sudo /bin/sh -c "curl -sfL https://get.k3s.io | K3S_URL=https://${plane_ip}:6443 K3S_TOKEN=${token} sh -"
 
 multipass exec watcher sudo cat /etc/rancher/k3s/k3s.yaml |sed "s/127.0.0.1/${plane_ip}/" > k3s.yaml
+chmod 0400 k3s.yaml
 export KUBECONFIG=`pwd`/k3s.yaml
 
 kubectl label nodes watcher flussonic.com/database=true
@@ -44,8 +45,19 @@ kubectl create secret generic flussonic-license --from-literal=license_key="${LI
 
 kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --from-literal=pass="${PASS}"
 
+helm install tw .
 
-# watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
+watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
+streamer1_ip=$(multipass info streamer1 | grep -i ip | awk '{print $2}')
+streamer2_ip=$(multipass info streamer2 | grep -i ip | awk '{print $2}')
+
+echo "Waiting for Postgresql to start" 
+kubectl wait --for=condition=Ready pod/tw-flussonic-watcher-postgres-0
+
+kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
+    /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
+    "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\"]');"
+    # "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
 
 # echo "Waiting for Watcher http://${watcher_ip} to start" 
 # kubectl wait --for=condition=Ready pod/watcher-0

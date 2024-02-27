@@ -32,16 +32,16 @@ spec:
       containers:
       - name: watcher
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
-        ports:
-        - containerPort: 9015
-          # hostPort: 9015
+        # ports:
+        # - containerPort: 9015
+        #   hostPort: 9015
         env:
-        {{- if .Values.watcher.debug -}}
+        {{- if .Values.watcher.debug }}
         - name: LOG
           value: DEBUG
         - name: ENV
           value: debug
-        {{- end -}}
+        {{- end }}
         - name: LICENSE_KEY
           valueFrom:
             secretKeyRef:
@@ -49,11 +49,11 @@ spec:
               key: license_key
               optional: false
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.default.svc.cluster.local:9017
+          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "9015"
         - name: LISTEN_HOST

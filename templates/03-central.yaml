@@ -40,7 +40,7 @@ spec:
               key: license_key
               optional: false
         - name: CENTRAL_DATABASE_URL
-          value: postgres://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.default.svc.cluster.local:5432/test_c?search_path=central
+          value: postgres://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c?search_path=central
         - name: CENTRAL_HTTP_PORT
           value: "9000"
         - name: CENTRAL_API_KEY
@@ -48,7 +48,7 @@ spec:
         - name: CENTRAL_EDIT_AUTH
           value: "admin pass"
         - name: CENTRAL_API_URL
-          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local"
+          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
         livenessProbe:
           httpGet:
             path: /central/api/v3/monitoring/liveness
@@ -107,6 +107,6 @@ spec:
             - name: API_KEY
               value: apikey0
             - name: CENTRAL_API
-              value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.default.svc.cluster.local"
+              value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
           restartPolicy: OnFailure
 {{- end }}
