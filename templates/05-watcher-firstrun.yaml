@@ -36,8 +36,8 @@ spec:
         - /bin/sh
         - -c
         - |
-          /opt/flussonic/bin/python3 -m manage check;
-          /opt/flussonic/bin/python3 -m manage ensure_api_key;
+          /opt/flussonic/bin/python3 -m manage check &&
+          /opt/flussonic/bin/python3 -m manage ensure_api_key &&
           /opt/flussonic/bin/watcher-firstrun.sh
-      restartPolicy: Never
+      restartPolicy: OnFailure
 {{- end }}

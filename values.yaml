@@ -12,6 +12,7 @@ postgres:
     flussonic.com/database: "true"
 
 streamer:
+  create: true
   repository: flussonic/flussonic
   tag: "v24.02-107"
   nodeSelector:
@@ -24,9 +25,12 @@ central:
 
 watcher:
   create: true
+  debug: false
   repository: flussonic/watcher
   tag: "v24.02.1-48"
   port: 80
+  # nodeSelector:
+  #   flussonic.com/database: "true"
 
 redis:
   create: true

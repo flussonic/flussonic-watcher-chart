@@ -1,3 +1,4 @@
+{{- if .Values.streamer.create -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -124,4 +125,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-
+{{- end }}
