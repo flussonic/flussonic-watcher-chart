@@ -62,8 +62,8 @@ echo "Waiting for Postgresql to start"
 kubectl wait --timeout=90s --for=condition=Ready pod/tw-flussonic-watcher-web-0
 
 sleep 2
-kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
-    /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
-    "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
+# kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
+#     /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
+#     "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
 
 echo "Watcher ready: http://${watcher_ip}/vsaas  with login/pass: ${LOGIN} ${PASS}"

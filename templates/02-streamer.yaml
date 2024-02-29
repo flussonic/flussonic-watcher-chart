@@ -29,7 +29,7 @@ data:
       root /storage;
     }
     auth_backend vsaas {
-      backend http://watcher.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
+      backend http://{{ include "flussonic-watcher-chart.fullname" . }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
     }
 ---
 apiVersion: v1

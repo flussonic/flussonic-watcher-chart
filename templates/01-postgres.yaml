@@ -12,47 +12,6 @@ spec:
     name: postgres
   selector:
     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
-# ---
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: postgres-pv
-#   labels:
-#     app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
-# spec:
-#   storageClassName: local-storage
-#   capacity:
-#     storage: 1Gi
-#   accessModes:
-#   - ReadWriteOnce
-#   local:
-#     path: /watcher/postgresql
-#   nodeAffinity:
-#       required:
-#         nodeSelectorTerms:
-#         - matchExpressions:
-#           - key: flussonic.com/database
-#             operator: In
-#             values:
-#             - "true"
-#   persistentVolumeReclaimPolicy: Retain
-#   volumeMode: Filesystem
-# ---
-# apiVersion: v1
-# kind: PersistentVolumeClaim
-# metadata:
-#   name: postgres-pvc
-# spec:
-#   accessModes:
-#     - ReadWriteOnce
-#   storageClassName: local-storage
-#   # storageClassName: longhorn
-#   resources:
-#     requests:
-#       storage: 1Gi
-#   selector:
-#     matchLabels:
-#       app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -70,7 +29,7 @@ spec:
         app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
     spec:
       containers:
-      - name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+      - name: postgres
         image: "{{ .Values.postgres.repository }}:{{ .Values.postgres.tag }}"
         ports:
         - containerPort: 5432
@@ -94,8 +53,6 @@ spec:
           periodSeconds: 60
           timeoutSeconds: 30
         volumeMounts:
-      #     - mountPath: /dev/shm
-      #       name: dshm
           - mountPath: /var/lib/postgresql/data
             subPath: data
             name: data
@@ -104,11 +61,6 @@ spec:
           hostPath:
             path: /watcher/postgresql
             type: Directory
-          # persistentVolumeClaim:
-          #   claimName: postgres-pvc
-      #   - name: dshm
-      #     persistentVolumeClaim:
-      #       claimName: postgresql-dshm-pvc
       {{- with .Values.postgres.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
