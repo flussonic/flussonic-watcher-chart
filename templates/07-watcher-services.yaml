@@ -28,6 +28,12 @@ spec:
           value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "5000"
+        - name: LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flussonic-license
+              key: license_key
+              optional: false
 
 
 ---
@@ -58,6 +64,12 @@ spec:
           value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
           value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+        - name: LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flussonic-license
+              key: license_key
+              optional: false
 
 
 ---
@@ -88,4 +100,10 @@ spec:
           value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
           value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+        - name: LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flussonic-license
+              key: license_key
+              optional: false
 {{- end }}

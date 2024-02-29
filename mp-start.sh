@@ -48,7 +48,9 @@ kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --fr
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.26/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-multipass exec watcher sudo mkdir -p /watcher/postgresql
+multipass exec watcher -- sudo mkdir -p /watcher/postgresql
+multipass exec streamer1 -- sudo mkdir -p /watcher/storage
+multipass exec streamer2 -- sudo mkdir -p /watcher/storage
 
 helm install tw .
 
@@ -57,7 +59,7 @@ streamer1_ip=$(multipass info streamer1 | grep -i ip | awk '{print $2}')
 streamer2_ip=$(multipass info streamer2 | grep -i ip | awk '{print $2}')
 
 echo "Waiting for Postgresql to start" 
-kubectl wait --for=condition=Ready pod/tw-flussonic-watcher-web-0
+kubectl wait --timeout=90s --for=condition=Ready pod/tw-flussonic-watcher-web-0
 
 sleep 2
 kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \

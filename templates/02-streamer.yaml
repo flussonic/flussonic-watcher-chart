@@ -25,7 +25,7 @@ data:
     }
     http 81;
     cluster_key steamerSecretKey0;
-    dvr central {
+    dvr watcher {
       root /storage;
     }
     auth_backend vsaas {
@@ -121,6 +121,8 @@ spec:
         - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
           mountPath: /etc/flussonic/flussonic.conf.d/cluster.conf
           subPath: cluster.conf
+        - name: storage
+          mountPath: /storage
       volumes:
       - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
         configMap:
@@ -128,6 +130,10 @@ spec:
           items:
           - key: cluster.conf
             path: cluster.conf
+      - name: storage
+        hostPath:
+          path: /watcher/storage
+          type: Directory
       {{- with .Values.streamer.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

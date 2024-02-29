@@ -64,4 +64,11 @@ spec:
                 name: {{ include "flussonic-watcher-chart.fullname" . }}
                 port:
                   number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+                port:
+                  number: 80
 {{- end }}
