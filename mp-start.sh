@@ -24,6 +24,10 @@ multipass launch --name watcher --cpus 1 --memory 1024M --disk 5G lts
 multipass launch --name streamer1 --cpus 1 --memory 1024M --disk 5G lts
 multipass launch --name streamer2 --cpus 1 --memory 1024M --disk 5G lts
 
+multipass exec watcher -- sudo apt remove -y snapd multipath-tools
+multipass exec streamer1 -- sudo apt remove -y snapd multipath-tools
+multipass exec streamer2 -- sudo apt remove -y snapd multipath-tools
+
 # multipass exec watcher -- sudo /bin/sh -c 'curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" INSTALL_K3S_VERSION="v1.25.11+k3s1" sh -'
 multipass exec watcher -- sudo /bin/sh -c 'curl -sfL https://get.k3s.io | sh -'
 
@@ -37,20 +41,25 @@ multipass exec watcher sudo cat /etc/rancher/k3s/k3s.yaml |sed "s/127.0.0.1/${pl
 chmod 0400 k3s.yaml
 export KUBECONFIG=`pwd`/k3s.yaml
 
+
+
+
 kubectl label nodes watcher flussonic.com/database=true
 kubectl label nodes streamer1 flussonic.com/streamer=true
 kubectl label nodes streamer2 flussonic.com/streamer=true
+multipass exec watcher -- sudo mkdir -p /watcher/postgresql
+multipass exec streamer1 -- sudo mkdir -p /watcher/storage
+multipass exec streamer2 -- sudo mkdir -p /watcher/storage
+
+
+
 
 kubectl create secret generic flussonic-license --from-literal=license_key="${LICENSE_KEY}"
-
 kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --from-literal=pass="${PASS}"
 
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.26/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-multipass exec watcher -- sudo mkdir -p /watcher/postgresql
-multipass exec streamer1 -- sudo mkdir -p /watcher/storage
-multipass exec streamer2 -- sudo mkdir -p /watcher/storage
 
 helm install tw .
 
@@ -62,8 +71,11 @@ echo "Waiting for Postgresql to start"
 kubectl wait --timeout=90s --for=condition=Ready pod/tw-flussonic-watcher-web-0
 
 sleep 2
-# kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
-#     /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
-#     "update domains set settings = jsonb_set(settings, '{dns_names}', '[\"${watcher_ip}\",\"${streamer1_ip}\",\"${streamer2_ip}\"]');"
+kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
+    /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
+    "insert into cloud_streams (name,stream_url,thumbnails,can_ptz,enabled,static,provision_required,domain_id,preset_id,organization_id,folder_id) \
+    values \
+    ('cam1','fake://fake','f','f','t','t','t',1,1,1,1)"
+
 
 echo "Watcher ready: http://${watcher_ip}/vsaas  with login/pass: ${LOGIN} ${PASS}"

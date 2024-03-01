@@ -8,19 +8,18 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.service.port }}
+  - port: 80
     targetPort: 9015
     name: watcher
   selector:
     app: {{ include "flussonic-watcher-chart.fullname" . }}-web
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "flussonic-watcher-chart.fullname" . }}-web
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: {{ include "flussonic-watcher-chart.fullname" . }}-web

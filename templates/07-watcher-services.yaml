@@ -1,11 +1,10 @@
 {{- if .Values.watcher.create -}}
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: {{ include "flussonic-watcher-chart.fullname" . }}-worker
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-worker
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: {{ include "flussonic-watcher-chart.fullname" . }}-worker
