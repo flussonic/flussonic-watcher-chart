@@ -61,6 +61,8 @@ kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --fr
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
 
+(cd central2 && make)
+
 helm install tw .
 
 watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
