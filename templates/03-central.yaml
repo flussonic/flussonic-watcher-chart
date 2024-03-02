@@ -47,8 +47,10 @@ spec:
           value: apikey0
         - name: CENTRAL_EDIT_AUTH
           value: "admin pass"
+        - name: CENTRAL_UPSTREAM_URL
+          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth"
         - name: CENTRAL_API_URL
-          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
+          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central2.{{ $.Release.Namespace }}.svc.cluster.local"
         livenessProbe:
           httpGet:
             path: /central/api/v3/monitoring/liveness
