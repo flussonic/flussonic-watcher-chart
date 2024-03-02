@@ -1,0 +1,41 @@
+{{- if .Values.central.create -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+  labels:
+    name: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+spec:
+  ports:
+  - port: 80
+    targetPort: 3020
+    name: central2
+  selector:
+    app: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+  template:
+    metadata:
+      labels:
+        app: {{ include "flussonic-watcher-chart.fullname" . }}-central2
+    spec:
+      nodeSelector:
+        flussonic.com/database: "true"
+      containers:
+      - name: {{ .Chart.Name }}-central2
+        image: "central2:1"
+        imagePullPolicy: Never
+        env:
+        - name: CENTRAL_API_KEY
+          value: apikey0
+        - name: CENTRAL_URL
+          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
+{{- end }}

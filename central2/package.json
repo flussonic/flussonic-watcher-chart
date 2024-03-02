@@ -1,14 +1,14 @@
 {
-    "name": "central2",
-    "version": "1.0.0",
-    "description": "central2 temporary hack",
-    "author": "Max Lapshin <max@erlyvideo.org>",
-    "license": "MIT",
-    "main": "central2.js",
-    "keywords": [
-      "express"
-    ],
-    "dependencies": {
-    }
+  "name": "central2",
+  "version": "1.0.0",
+  "description": "central2 temporary hack",
+  "author": "Max Lapshin <max@erlyvideo.org>",
+  "license": "MIT",
+  "main": "central2.js",
+  "keywords": [
+    "express"
+  ],
+  "dependencies": {
+    "express": "^4.18.3"
   }
-  
+}

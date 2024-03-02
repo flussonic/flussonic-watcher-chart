@@ -25,3 +25,5 @@ env
 k3s.yaml
 mp-start.sh
 mp-stop.sh
+central2
+

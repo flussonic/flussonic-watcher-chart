@@ -1,6 +1,6 @@
-FROM node:21
+FROM node:21-alpine
 
-ADD package.json ./
+ADD package.json yarn.lock ./
 RUN yarn install
 
 ADD central2.js .
