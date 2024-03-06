@@ -31,8 +31,6 @@ watcher:
   # nodeSelector:
   #   flussonic.com/database: "true"
 
-redis:
-  create: true
 
 imagePullSecrets: []
 nameOverride: ""

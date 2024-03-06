@@ -48,7 +48,7 @@ spec:
       }
       auth_backend vsaas {
         allow token npIBeaDH6uTkR2;
-        backend http://{{ .Release.Name }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
+        backend http://{{ .Release.Name }}-watcher-web.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
       }
   volumes:
   - name: storage

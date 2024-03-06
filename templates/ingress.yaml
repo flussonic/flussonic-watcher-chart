@@ -54,14 +54,14 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}
+                name: {{ .Release.Name }}-watcher-web
                 port:
                   number: 80
           - path: /watcher
             pathType: Prefix
             backend:
               service:
-                name: {{ .Release.Name }}
+                name: {{ .Release.Name }}-watcher-web
                 port:
                   number: 80
           - path: /

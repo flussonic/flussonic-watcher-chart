@@ -1,66 +1,33 @@
-{{- if .Values.watcher.create -}}
-apiVersion: v1
-kind: Service
+apiVersion: media.flussonic.com/v1alpha1
+kind: Watcher
 metadata:
-  name: {{ .Release.Name }}
-  labels:
-    {{- include "flussonic-watcher-chart.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-watcher
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-  - port: 80
-    targetPort: 9015
-    name: watcher
-  selector:
-    app: {{ .Release.Name }}-web
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Release.Name }}-web
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}-web
-  template:
-    metadata:
-      labels:
-        app: {{ .Release.Name }}-web
-    spec:
-      containers:
-      - name: watcher
-        image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
-        # ports:
-        # - containerPort: 9015
-        #   hostPort: 9015
-        env:
-        {{- if .Values.watcher.debug }}
-        - name: LOG
-          value: DEBUG
-        - name: ENV
-          value: debug
-        {{- end }}
-        - name: LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: flussonic-license
-              key: license_key
-              optional: false
-        - name: DB
-          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
-        - name: REDIS
-          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
-        - name: CENTRAL_URL
-          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
-        - name: PORT
-          value: "9015"
-        - name: LISTEN_HOST
-          value: '0.0.0.0'
-        - name: NODBCHECK
-          value: "true"
-      {{- with .Values.watcher.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-{{- end }}
+  central: "http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3"
+  database: "postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c"
+  image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
+  env:
+    {{- if .Values.watcher.debug }}
+    - name: LOG
+      value: DEBUG
+    - name: ENV
+      value: debug
+    {{- end }}
+    - name: LICENSE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: license_key
+          optional: false
+    - name: WATCHER_ADMIN_LOGIN
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: login
+          optional: false
+    - name: WATCHER_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: pass
+          optional: false
