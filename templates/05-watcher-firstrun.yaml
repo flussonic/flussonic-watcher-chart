@@ -2,22 +2,22 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: watcher-firstrun
+  name: {{ .Release.Name }}-firstrun
 spec:
   backoffLimit: 20
   activeDeadlineSeconds: 180
   template:
     spec:
       containers:
-      - name: watcher-firstrun
+      - name: firstrun
         image: "{{ .Values.watcher.repository }}:{{ .Values.watcher.tag }}"
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
+          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "5000"
         - name: WATCHER_ADMIN_LOGIN

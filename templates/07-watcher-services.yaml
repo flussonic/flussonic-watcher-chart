@@ -2,16 +2,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-worker
+  name: {{ .Release.Name }}-worker
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-worker
+      app: {{ .Release.Name }}-worker
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-worker
+        app: {{ .Release.Name }}-worker
     spec:
       containers:
       - name: worker
@@ -20,11 +20,11 @@ spec:
         - worker
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
+          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "5000"
         - name: LICENSE_KEY
@@ -39,17 +39,17 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
+  name: {{ .Release.Name }}-scheduler
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
+  serviceName: {{ .Release.Name }}-scheduler
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
+      app: {{ .Release.Name }}-scheduler
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-scheduler
+        app: {{ .Release.Name }}-scheduler
     spec:
       containers:
       - name: scheduler
@@ -58,11 +58,11 @@ spec:
         - scheduler
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
+          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: LICENSE_KEY
           valueFrom:
             secretKeyRef:
@@ -75,17 +75,17 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
+  name: {{ .Release.Name }}-episodes
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
+  serviceName: {{ .Release.Name }}-episodes
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
+      app: {{ .Release.Name }}-episodes
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-episodes
+        app: {{ .Release.Name }}-episodes
     spec:
       containers:
       - name: episodes
@@ -94,11 +94,11 @@ spec:
         - episodes
         env:
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
+          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: LICENSE_KEY
           valueFrom:
             secretKeyRef:

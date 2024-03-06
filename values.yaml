@@ -14,20 +14,20 @@ postgres:
 streamer:
   create: true
   repository: flussonic/flussonic
-  tag: "v24.02-127"
+  tag: "v24.03-5"
   nodeSelector:
     flussonic.com/streamer: "true"
 
 central:
   create: true
   repository: flussonic/central
-  tag: "v24.03-7"   
+  tag: "v24.03-20"   
 
 watcher:
   create: true
   debug: true
   repository: flussonic/watcher
-  tag: "v24.02.1-79"
+  tag: "v24.03-2"
   # nodeSelector:
   #   flussonic.com/database: "true"
 

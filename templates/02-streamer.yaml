@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+  name: {{ .Release.Name }}-streamer
   labels:
     {{- include "flussonic-watcher-chart.labels" . | nindent 4 }}
 spec:
@@ -12,139 +12,48 @@ spec:
     targetPort: 80
     name: streamer
   selector:
-    app: streamer
+    app: {{ .Release.Name }}-streamer
 ---
-apiVersion: v1
-kind: ConfigMap
+apiVersion: media.flussonic.com/v1alpha1
+kind: MediaServer
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer-presets
-data:
-  cluster.conf: |
-    http 80 {
-      api false;
-    }
-    http 81;
-    cluster_key steamerSecretKey0;
-    dvr watcher {
-      root /storage;
-    }
-    auth_backend vsaas {
-      allow token secretkey;
-      backend http://{{ include "flussonic-watcher-chart.fullname" . }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
-    }
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ .Chart.Name }}-license-storage
-data:
-# root:password
-  edit_auth: cm9vdDpwYXNzd29yZA==  
----
-apiVersion: apps/v1
-kind: DaemonSet
-metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+  labels:
+  name: {{ .Release.Name }}
 spec:
-  selector:
-    matchLabels:
-      app: streamer
-  template:
-    metadata:
-      {{- with .Values.streamer.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      labels:
-        app: streamer
-        {{- include "flussonic-watcher-chart.labels" . | nindent 8 }}
-        {{- with .Values.streamer.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-    spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
-      securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:
-      - name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
-        image: "{{ .Values.streamer.repository }}:{{ .Values.streamer.tag }}"
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 80
-          name: http
-        - containerPort: 81
-          name: http-api
-        env:
-        - name: FLUSSONIC_HOSTNAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        - name: LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: flussonic-license
-              key: license_key
-              optional: false
-        - name: FLUSSONIC_CONFIG_EXTERNAL
-          value: "http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central2.{{ $.Release.Namespace }}.svc.cluster.local/central/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
-        - name: FLUSSONIC_SECRETS_STORAGE
-          value: "k8s://{{ .Chart.Name }}-license-storage"
-        - name: FLUSSONIC_EDIT_AUTH
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Chart.Name }}-license-storage
-              key: edit_auth
-              optional: false
-        livenessProbe:
-          httpGet:
-            path: /flussonic/api/v3/monitoring/liveness
-            port: 81
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        startupProbe:
-          httpGet:
-            path: /flussonic/api/v3/monitoring/readiness
-            port: 81
-          initialDelaySeconds: 3
-          periodSeconds: 3
-          failureThreshold: 30
-        readinessProbe:
-          httpGet:
-            path: /flussonic/api/v3/monitoring/readiness
-            port: 81
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        volumeMounts:
-        - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
-          mountPath: /etc/flussonic/flussonic.conf.d/cluster.conf
-          subPath: cluster.conf
-        - name: storage
-          mountPath: /storage
-      volumes:
-      - name: {{ include "flussonic-watcher-chart.fullname" . }}-config-template
-        configMap:
-          name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer-presets
-          items:
-          - key: cluster.conf
-            path: cluster.conf
-      - name: storage
-        hostPath:
-          path: /watcher/storage
-          type: Directory
-      {{- with .Values.streamer.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.streamer.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.streamer.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+  image: flussonic/flussonic:v24.02-107
+  hostPort: 85
+  adminHostPort: 86
+  env:
+    - name: LICENSE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: license_key
+          optional: false
+    - name: FLUSSONIC_CONFIG_EXTERNAL
+      value: "http://apikey0@{{ .Release.Name }}-central2.{{ $.Release.Namespace }}.svc.cluster.local/central/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
+    - name: FLUSSONIC_EDIT_AUTH
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: edit_auth
+          optional: false
+  nodeSelector:
+    flussonic.com/streamer: "true"
+  configExtra:
+    watcher.conf: |
+      cluster_key steamerSecretKey0;
+      dvr watcher {
+        root /storage;
+      }
+      auth_backend vsaas {
+        allow token npIBeaDH6uTkR2;
+        backend http://{{ .Release.Name }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth;
+      }
+  volumes:
+  - name: storage
+    mountPath: /storage
+    hostPath:
+      path: /watcher/storage
+      type: Directory
 {{- end }}

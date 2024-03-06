@@ -2,31 +2,31 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+  name: {{ .Release.Name }}-postgres
   labels:
-    name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+    name: {{ .Release.Name }}-postgres
 spec:
   ports:
   - port: 5432
     targetPort: 5432
     name: postgres
   selector:
-    app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+    app: {{ .Release.Name }}-postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+  name: {{ .Release.Name }}-postgres
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+  serviceName: {{ .Release.Name }}-postgres
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+      app: {{ .Release.Name }}-postgres
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-postgres
+        app: {{ .Release.Name }}-postgres
     spec:
       containers:
       - name: postgres

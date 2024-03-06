@@ -5,6 +5,7 @@ const app = express()
 const port = process.env.PORT || 3020
 const central = process.env.CENTRAL_URL
 const apikey = process.env.CENTRAL_API_KEY
+const token = process.env.CENTRAL_TOKEN
 
 
 app.use((req, res, next) => {
@@ -56,7 +57,6 @@ async function dynamic_streams(req, res) {
         //     {headers: {'Authorization': `Bearer ${apikey}`}})
         // const j2 = await r2.json()
         // const token = j2.key;
-        const token = "secretkey";
 
 
         const r = await fetch(`${central}/central/api/v3/streams?name=${req.query.name}`,

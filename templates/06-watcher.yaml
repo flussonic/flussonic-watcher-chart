@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}
+  name: {{ .Release.Name }}
   labels:
     {{- include "flussonic-watcher-chart.labels" . | nindent 4 }}
 spec:
@@ -12,21 +12,21 @@ spec:
     targetPort: 9015
     name: watcher
   selector:
-    app: {{ include "flussonic-watcher-chart.fullname" . }}-web
+    app: {{ .Release.Name }}-web
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-web
+  name: {{ .Release.Name }}-web
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-web
+      app: {{ .Release.Name }}-web
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-web
+        app: {{ .Release.Name }}-web
     spec:
       containers:
       - name: watcher
@@ -48,11 +48,11 @@ spec:
               key: license_key
               optional: false
         - name: DB
-          value: postgresql://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
+          value: postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c
         - name: REDIS
-          value: redis://{{ include "flussonic-watcher-chart.fullname" . }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
+          value: redis://{{ .Release.Name }}-redis.{{ $.Release.Namespace }}.svc.cluster.local:9017
         - name: CENTRAL_URL
-          value: http://apikey0@{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
+          value: http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/streamer/api/v3
         - name: PORT
           value: "9015"
         - name: LISTEN_HOST

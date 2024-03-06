@@ -2,35 +2,36 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-central
+  name: {{ .Release.Name }}-central
   labels:
-    name: {{ include "flussonic-watcher-chart.fullname" . }}-central
+    name: {{ .Release.Name }}-central
 spec:
   ports:
   - port: 80
     targetPort: 9000
     name: central
   selector:
-    app: {{ include "flussonic-watcher-chart.fullname" . }}-central
+    app: {{ .Release.Name }}-central
+  # sessionAffinity: ClientIP
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-central
+  name: {{ .Release.Name }}-central
 spec:
-  serviceName: {{ include "flussonic-watcher-chart.fullname" . }}-central
+  serviceName: {{ .Release.Name }}-central
   replicas: 1
   selector:
     matchLabels:
-      app: {{ include "flussonic-watcher-chart.fullname" . }}-central
+      app: {{ .Release.Name }}-central
   template:
     metadata:
       labels:
-        app: {{ include "flussonic-watcher-chart.fullname" . }}-central
+        app: {{ .Release.Name }}-central
     spec:
       serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
       containers:
-      - name: {{ .Chart.Name }}-central
+      - name: {{ .Release.Name }}-central
         image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
         env:
         - name: CENTRAL_LICENSE_KEY
@@ -40,17 +41,21 @@ spec:
               key: license_key
               optional: false
         - name: CENTRAL_DATABASE_URL
-          value: postgres://test:test@{{ include "flussonic-watcher-chart.fullname" . }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c?search_path=central
+          value: postgres://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c?search_path=central
         - name: CENTRAL_HTTP_PORT
           value: "9000"
         - name: CENTRAL_API_KEY
           value: apikey0
         - name: CENTRAL_EDIT_AUTH
           value: "admin pass"
+        - name: CENTRAL_VISION_API_TOKEN
+          value: "npIBeaDH6uTkR2"
+        - name: CENTRAL_CLUSTER_NODE_CONFIG_PROVISION_ENABLED
+          value: "false"
         - name: CENTRAL_UPSTREAM_URL
-          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth"
+          value: "http://{{ .Release.Name }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth"
         - name: CENTRAL_API_URL
-          value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central2.{{ $.Release.Namespace }}.svc.cluster.local"
+          value: "http://{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
         livenessProbe:
           httpGet:
             path: /central/api/v3/monitoring/liveness
@@ -86,7 +91,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "flussonic-watcher-chart.fullname" . }}-central-streamers-provisioner
+  name: {{ .Release.Name }}-central-streamers-provisioner
 spec:
   schedule: "* * * * *"
   concurrencyPolicy: Forbid
@@ -109,8 +114,8 @@ spec:
             - name: API_KEY
               value: apikey0
             - name: SELECTOR
-              value: app=streamer
+              value: app={{ .Release.Name }}-streamer
             - name: CENTRAL_API
-              value: "http://{{ include "flussonic-watcher-chart.fullname" . }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
+              value: "http://{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
           restartPolicy: OnFailure
 {{- end }}

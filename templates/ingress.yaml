@@ -1,5 +1,4 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "flussonic-watcher-chart.fullname" . -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.ingress.annotations "kubernetes.io/ingress.class") }}
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
@@ -8,7 +7,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ .Release.Name }}
   labels:
     {{- include "flussonic-watcher-chart.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -31,7 +30,7 @@ spec:
   {{- end }}
   defaultBackend:
     service:
-      name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+      name: {{ .Release.Name }}-streamer
       port:
         number: 80
   rules:
@@ -41,35 +40,35 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "flussonic-watcher-chart.fullname" . }}
+                name: {{ .Release.Name }}
                 port:
                   number: 80
           - path: /central
             pathType: Prefix
             backend:
               service:
-                name: {{ include "flussonic-watcher-chart.fullname" . }}-central
+                name: {{ .Release.Name }}-central
                 port:
                   number: 80
           - path: /vsaas
             pathType: Prefix
             backend:
               service:
-                name: {{ include "flussonic-watcher-chart.fullname" . }}
+                name: {{ .Release.Name }}
                 port:
                   number: 80
           - path: /watcher
             pathType: Prefix
             backend:
               service:
-                name: {{ include "flussonic-watcher-chart.fullname" . }}
+                name: {{ .Release.Name }}
                 port:
                   number: 80
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: {{ include "flussonic-watcher-chart.fullname" . }}-streamer
+                name: {{ .Release.Name }}-streamer
                 port:
                   number: 80
 {{- end }}

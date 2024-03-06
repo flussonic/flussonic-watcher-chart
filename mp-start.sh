@@ -20,7 +20,7 @@ if [ -z "$PASS" ]; then
     read -p "Enter Watcher password: "  PASS
 fi
 
-multipass launch --name watcher --cpus 1 --memory 1024M --disk 5G lts
+multipass launch --name watcher --cpus 1 --memory 4096M --disk 5G lts
 multipass launch --name streamer1 --cpus 1 --memory 1024M --disk 5G lts
 multipass launch --name streamer2 --cpus 1 --memory 1024M --disk 5G lts
 
@@ -37,6 +37,7 @@ plane_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
 multipass exec streamer1 -- sudo /bin/sh -c "curl -sfL https://get.k3s.io | K3S_URL=https://${plane_ip}:6443 K3S_TOKEN=${token} sh -"
 multipass exec streamer2 -- sudo /bin/sh -c "curl -sfL https://get.k3s.io | K3S_URL=https://${plane_ip}:6443 K3S_TOKEN=${token} sh -"
 
+rm -f k3s.yaml
 multipass exec watcher sudo cat /etc/rancher/k3s/k3s.yaml |sed "s/127.0.0.1/${plane_ip}/" > k3s.yaml
 chmod 0400 k3s.yaml
 export KUBECONFIG=`pwd`/k3s.yaml
@@ -54,7 +55,7 @@ multipass exec streamer2 -- sudo mkdir -p /watcher/storage
 
 
 
-kubectl create secret generic flussonic-license --from-literal=license_key="${LICENSE_KEY}"
+kubectl create secret generic flussonic-license --from-literal=license_key="${LICENSE_KEY}" --from-literal=edit_auth="root:password"
 kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --from-literal=pass="${PASS}"
 
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.26/deploy/local-path-storage.yaml
@@ -63,6 +64,8 @@ kubectl create secret generic watcher-admin --from-literal=login="${LOGIN}" --fr
 
 (cd central2 && make)
 
+kubectl apply -f https://flussonic.github.io/media-server-operator/operator.yaml
+
 helm install tw .
 
 watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
@@ -70,10 +73,10 @@ streamer1_ip=$(multipass info streamer1 | grep -i ip | awk '{print $2}')
 streamer2_ip=$(multipass info streamer2 | grep -i ip | awk '{print $2}')
 
 echo "Waiting for Postgresql to start" 
-kubectl wait --timeout=90s --for=condition=Ready pod/tw-flussonic-watcher-web-0
+kubectl wait --timeout=90s --for=condition=Complete job.batch/tw-firstrun
 
 sleep 2
-kubectl exec pod/tw-flussonic-watcher-postgres-0  -- \
+kubectl exec pod/tw-postgres-0  -- \
     /usr/bin/psql -U test -h 127.0.0.1 test_c -c \
     "insert into cloud_streams (name,stream_url,thumbnails,can_ptz,enabled,static,provision_required,domain_id,preset_id,organization_id,folder_id) \
     values \
