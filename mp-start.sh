@@ -74,15 +74,16 @@ kubectl create secret generic flussonic-license \
 
 (cd central2 && make)
 
-kubectl apply -f https://flussonic.github.io/media-server-operator/operator.yaml
-kubectl apply -f https://flussonic.github.io/watcher-operator/operator.yaml
+kubectl apply -f https://flussonic.github.io/media-server-operator/latest/operator.yaml
+kubectl apply -f https://flussonic.github.io/watcher-operator/latest/operator.yaml
 
 helm install tw .
 
 watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
 
 # echo "Waiting for Postgresql to start" 
-# kubectl wait --timeout=90s --for=condition=Complete job.batch/tw-firstrun
+sleep 2
+# kubectl wait --timeout=90s --for=condition=Complete job.batch/tw-watcher-firstrun
 
 # sleep 2
 # kubectl exec pod/tw-postgres-0  -- \
@@ -91,5 +92,16 @@ watcher_ip=$(multipass info watcher | grep -i ip | awk '{print $2}')
 #     values \
 #     ('cam1','fake://fake','f','f','t','t','t',1,1,1,1)"
 
+
+# SESSION=$(curl -sS -f \
+#     -H 'content-type:application/json' \
+#     -d "{\"login\": \"${LOGIN}\", \"password\": \"${PASS}\"}" \
+#     http://${watcher_ip}/vsaas/api/v2/auth/login \
+#     | jq -r '.session')
+
+# curl -sS -f -X POST http://${watcher_ip}/vsaas/api/v2/cameras \
+#     -H "x-vsaas-session: ${SESSION}" \
+#     -H 'content-type: application/json' \
+#     -d '{"title": "First Camera", "stream_url": "fake://clock"}'
 
 echo "Watcher ready: http://${watcher_ip}/vsaas  with login/pass: ${LOGIN} ${PASS}"
