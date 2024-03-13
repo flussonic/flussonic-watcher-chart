@@ -20,7 +20,7 @@ metadata:
   labels:
   name: {{ .Release.Name }}
 spec:
-  image: flussonic/flussonic:v24.02-107
+  image: "{{ .Values.streamer.repository }}:{{ .Values.streamer.tag }}"
   hostPort: 85
   adminHostPort: 86
   env:
@@ -31,7 +31,7 @@ spec:
           key: license_key
           optional: false
     - name: FLUSSONIC_CONFIG_EXTERNAL
-      value: "http://apikey0@{{ .Release.Name }}-central2.{{ $.Release.Namespace }}.svc.cluster.local/central/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
+      value: "http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local/central/api/v3/streamers/$(FLUSSONIC_HOSTNAME)"
     - name: FLUSSONIC_EDIT_AUTH
       valueFrom:
         secretKeyRef:

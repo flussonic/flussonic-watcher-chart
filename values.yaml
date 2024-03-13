@@ -21,7 +21,7 @@ streamer:
 central:
   create: true
   repository: flussonic/central
-  tag: "v24.03-20"   
+  tag: "v24.03.1-42"   
 
 watcher:
   create: true

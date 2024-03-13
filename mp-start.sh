@@ -72,8 +72,6 @@ kubectl create secret generic flussonic-license \
 # kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
 # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
 
-(cd central2 && make)
-
 kubectl apply -f https://flussonic.github.io/media-server-operator/latest/operator.yaml
 kubectl apply -f https://flussonic.github.io/watcher-operator/latest/operator.yaml
 

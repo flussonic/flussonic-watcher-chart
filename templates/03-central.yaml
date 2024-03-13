@@ -48,7 +48,7 @@ spec:
           value: apikey0
         - name: CENTRAL_EDIT_AUTH
           value: "admin pass"
-        - name: CENTRAL_VISION_API_TOKEN
+        - name: CENTRAL_DYNAMIC_STREAMS_AUTH_TOKEN
           value: "npIBeaDH6uTkR2"
         - name: CENTRAL_CLUSTER_NODE_CONFIG_PROVISION_ENABLED
           value: "false"
