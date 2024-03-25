@@ -1,121 +1,26 @@
 {{- if .Values.central.create -}}
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-central
-  labels:
-    name: {{ .Release.Name }}-central
-spec:
-  ports:
-  - port: 80
-    targetPort: 9000
-    name: central
-  selector:
-    app: {{ .Release.Name }}-central
-  # sessionAffinity: ClientIP
----
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: media.flussonic.com/v1alpha1
+kind: Central
 metadata:
   name: {{ .Release.Name }}-central
 spec:
-  serviceName: {{ .Release.Name }}-central
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Release.Name }}-central
-  template:
-    metadata:
-      labels:
-        app: {{ .Release.Name }}-central
-    spec:
-      serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
-      containers:
-      - name: {{ .Release.Name }}-central
-        image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
-        env:
-        - name: CENTRAL_LICENSE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: flussonic-license
-              key: license_key
-              optional: false
-        - name: CENTRAL_DATABASE_URL
-          value: postgres://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c?search_path=central
-        - name: CENTRAL_HTTP_PORT
-          value: "9000"
-        - name: CENTRAL_API_KEY
-          value: apikey0
-        - name: CENTRAL_EDIT_AUTH
-          value: "admin pass"
-        - name: CENTRAL_DYNAMIC_STREAMS_AUTH_TOKEN
-          value: "npIBeaDH6uTkR2"
-        - name: CENTRAL_CLUSTER_NODE_CONFIG_PROVISION_ENABLED
-          value: "false"
-        - name: CENTRAL_UPSTREAM_URL
-          value: "http://{{ .Release.Name }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth"
-        - name: CENTRAL_API_URL
-          value: "http://{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
-        livenessProbe:
-          httpGet:
-            path: /central/api/v3/monitoring/liveness
-            port: 9000
-          initialDelaySeconds: 3
-          periodSeconds: 3
-        startupProbe:
-          httpGet:
-            path: /central/api/v3/monitoring/readiness
-            port: 9000
-          initialDelaySeconds: 3
-          periodSeconds: 3
-          failureThreshold: 30
-        readinessProbe:
-          httpGet:
-            path: /central/api/v3/monitoring/readiness
-            port: 9000
-          initialDelaySeconds: 3
-          periodSeconds: 3
-      {{- with .Values.central.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.central.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.central.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: {{ .Release.Name }}-central-streamers-provisioner
-spec:
-  schedule: "* * * * *"
-  concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 3
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          serviceAccountName: {{ include "flussonic-watcher-chart.serviceAccountName" . }}
-          containers:
-          - name: central-provisioner
-            image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
-            imagePullPolicy: IfNotPresent
-            command:
-            - /opt/central/bin/run.sh
-            - -p
-            env:
-            - name: CLUSTER_KEY
-              value: steamerSecretKey0
-            - name: API_KEY
-              value: apikey0
-            - name: SELECTOR
-              value: app={{ .Release.Name }}-streamer
-            - name: CENTRAL_API
-              value: "http://{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
-          restartPolicy: OnFailure
+  nodeSelector:
+    flussonic.com/central: "true"
+  database: "postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c"
+  image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
+  apiKey: "apikey0"
+  logRequests: false
+  apiUrl: "http://apikey0@{{ .Release.Name }}-central.{{ $.Release.Namespace }}.svc.cluster.local"
+  provisionerClusterKey: "steamerSecretKey0"
+  provisionerSelector: {{ .Release.Name }}-streamer
+  dynamicStreamsAuthToken: "npIBeaDH6uTkR2"
+  env:
+    - name: CENTRAL_LICENSE_KEY
+      valueFrom:
+        secretKeyRef:
+          name: flussonic-license
+          key: license_key
+          optional: false
+    - name: CENTRAL_UPSTREAM_URL
+      value: "http://{{ .Release.Name }}.{{ $.Release.Namespace }}.svc.cluster.local/vsaas/api/camera_auth"
 {{- end }}

@@ -40,6 +40,8 @@ export KUBECONFIG=`pwd`/k3s.yaml
 
 
 kubectl label nodes watcher flussonic.com/database=true
+kubectl label nodes watcher flussonic.com/central=true
+
 multipass exec watcher -- sudo mkdir -p /watcher/postgresql
 multipass exec watcher -- sudo mkdir -p /watcher/storage
 
@@ -74,6 +76,7 @@ kubectl create secret generic flussonic-license \
 
 kubectl apply -f https://flussonic.github.io/media-server-operator/latest/operator.yaml
 kubectl apply -f https://flussonic.github.io/watcher-operator/latest/operator.yaml
+kubectl apply -f https://flussonic.github.io/central-operator/latest/operator.yaml
 
 helm install tw .
 
