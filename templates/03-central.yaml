@@ -4,8 +4,6 @@ kind: Central
 metadata:
   name: {{ .Release.Name }}-central
 spec:
-  nodeSelector:
-    flussonic.com/central: "true"
   database: "postgresql://test:test@{{ .Release.Name }}-postgres.{{ $.Release.Namespace }}.svc.cluster.local:5432/test_c"
   image: "{{ .Values.central.repository }}:{{ .Values.central.tag }}"
   apiKey: "apikey0"
