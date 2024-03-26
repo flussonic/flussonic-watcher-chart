@@ -8,6 +8,7 @@ kubectl create secret generic flussonic-license \
     --from-literal=pass="${PASS}"
 kubectl apply -f https://flussonic.github.io/media-server-operator/latest/operator.yaml
 kubectl apply -f https://flussonic.github.io/watcher-operator/latest/operator.yaml
+kubectl apply -f https://flussonic.github.io/central-operator/latest/operator.yaml
 
 helm install tw .
 
